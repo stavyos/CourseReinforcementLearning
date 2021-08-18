@@ -2,4 +2,4 @@
 
 Stav Yosef & Dan Botchan
 
-Submitted as final project report for the RL course, IDC, 202
+Submitted as final project report for the RL course, IDC, 2021
