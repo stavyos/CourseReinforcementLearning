@@ -4,15 +4,16 @@ import os
 
 import numpy as np
 
+exten = 'jpg'
 for _folder in os.listdir():
     if os.path.isdir(_folder):
         for img_name in os.listdir(_folder):
-            if os.path.exists(os.path.join(_folder, img_name).replace('.png', '_cutted.png')):
+            if os.path.exists(os.path.join(_folder, img_name).replace(f'.{exten}', f'_cutted.{exten}')):
                 continue
-            if img_name.endswith('_cutted.png'):
+            if img_name.endswith(f'_cutted.{exten}'):
                 continue
 
-            if img_name.endswith('.png'):
+            if img_name.endswith(f'.{exten}'):
                 _img = cv2.imread(os.path.join(_folder, img_name))
                 img = np.sum(_img, axis=2)
 
@@ -25,4 +26,4 @@ for _folder in os.listdir():
                     _img = np.delete(_img, np.arange(result[-1], _img.shape[axis_mod]), axis_mod)
                     _img = np.delete(_img, np.arange(result[0]), axis_mod)
 
-                cv2.imwrite(os.path.join(_folder, img_name).replace('.png', '_cutted.png'), _img)
+                cv2.imwrite(os.path.join(_folder, img_name).replace(f'.{exten}', f'_cutted.{exten}'), _img)

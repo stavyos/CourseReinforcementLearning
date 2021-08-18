@@ -172,6 +172,36 @@ def plotting_avg_reward_dueling_dqn():
     plotting_avg_reward(_path=_path, title=title)
 
 
+def plotting_exploitation_dqn():
+    _path = f'models//DQN//layers_3//only_exploitation//'
+
+    df = pd.read_csv(filepath_or_buffer=os.path.join(_path, 'logging.csv'), sep=',')
+    df_with_exploration = pd.read_csv(filepath_or_buffer=os.path.join(_path, 'logging_with_exploration.csv'), sep=',')
+
+    data_feature = 'AvgReward'
+
+    sns.scatterplot(data=df[['Episode', 'Reward']],
+                    x='Episode',
+                    y='Reward')
+
+    sns.scatterplot(data=df_with_exploration[['Episode', 'Reward']],
+                    x='Episode',
+                    y='Reward')
+
+    sns.lineplot(data=df[['Episode', data_feature]],
+                 x='Episode',
+                 y=data_feature,
+                 label='Train with only exploitation')
+    sns.lineplot(data=df_with_exploration[['Episode', data_feature]],
+                 x='Episode',
+                 y=data_feature,
+                 label='Train with exploration')
+
+    plt.xlabel('Episode', size=15)
+    plt.ylabel('Avg Reward', size=15)
+    plt.show()
+
+
 def plotting_video_figure():
     df = pd.read_csv('models//SAC//logging.csv', sep=',')
 
@@ -179,7 +209,6 @@ def plotting_video_figure():
     avg_rewards = df['AvgReward'].to_numpy().astype('float')
     solved_idx = np.where(avg_rewards >= 200)[0][0]
 
-    # plt.plot(steps, label='Episode Steps')
     plt.plot(rewards, label='Epsiode Reward')
     plt.plot(avg_rewards, label='Avg 100 Last Rewards')
     plt.plot([200] * df.shape[0], label='Winning Game Threshold')
@@ -202,14 +231,72 @@ def plotting_video_figure():
     plt.show()
 
 
+def plotting_sac():
+    df = pd.read_csv('models//SAC//logging.csv', sep=',')
+
+    df = df.iloc[: df[df['AvgReward'] >= 200].index[0]]
+
+    rewards = df['Reward'].to_numpy().astype('float')
+    avg_rewards = df['AvgReward'].to_numpy().astype('float')
+
+    plt.plot(rewards, label='Epsiode Reward', alpha=0.75)
+    plt.plot(avg_rewards, label='Avg 100 Last Rewards')
+
+    plt.axhline(y=200,
+                color='gray',
+                linestyle='--',
+                linewidth=1,
+                alpha=0.75,
+                label=f'Winning Threshold')
+
+    plt.xlabel("Episode", size=16)
+    plt.ylabel("Score", size=16)
+
+    plt.legend()
+    plt.show()
+
+
+def plotting_testing_sac():
+    df = pd.read_csv('models//SAC//testing.csv', usecols=['Episode', 'Reward', 'AvgReward'], sep=',')
+
+    df = df[df['Episode'] >= 100]
+
+    sns.lineplot(data=df[['Episode', 'Reward']],
+                 x='Episode',
+                 y='Reward',
+                 label='Epsiode Reward',
+                 alpha=0.75)
+    sns.lineplot(data=df[['Episode', 'AvgReward']],
+                 x='Episode',
+                 y='AvgReward',
+                 label='Avg 100 Last Rewards')
+
+    plt.axhline(y=200,
+                color='gray',
+                linestyle='--',
+                linewidth=1,
+                alpha=0.75,
+                label=f'Winning Threshold')
+
+    plt.xlim((100, 1000))
+    plt.xlabel("Episode", size=16)
+    plt.ylabel("Score", size=16)
+
+    plt.legend()
+    plt.show()
+
+
 def main():
     # plotting_avg_reward_dqn()
     # plotting_avg_reward_dueling_dqn()
+    # plotting_exploitation_dqn()
     # #
-    plotting_testing_avg_reward_dqn()
-    plotting_testing_avg_reward_dueling_dqn()
+    # plotting_testing_avg_reward_dqn()
+    # plotting_testing_avg_reward_dueling_dqn()
     # #
     # plotting_video_figure()
+    # plotting_sac()
+    # plotting_testing_sac()
     pass
 
 

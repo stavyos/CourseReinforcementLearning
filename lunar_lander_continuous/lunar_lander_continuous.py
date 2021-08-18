@@ -125,7 +125,7 @@ def train_dqn_dueling_dqn(env: LunarLanderContinuous,
             total_steps += 1
             epsilon = np.interp(total_steps, [0, EPSILON_DECAY], [EPSILON_START, EPSILON_END])
 
-            if random.random() <= epsilon:
+            if random.random() <= epsilon and False:
                 action = env.action_space.sample()
                 action = round_actions(action=action)
             else:
@@ -213,8 +213,11 @@ def start_dqn_dueling_dqn(network_architecture: type, dir_experiment: str):
 
     initialize_replay_memory(env=env, replay_memory=replay_memory)
 
-    df_result = train_dqn_dueling_dqn(env=env, online_net=online_net, target_net=target_net,
-                                      replay_memory=replay_memory, reward_buffer=reward_buffer)
+    df_result = train_dqn_dueling_dqn(env=env,
+                                      online_net=online_net,
+                                      target_net=target_net,
+                                      replay_memory=replay_memory,
+                                      reward_buffer=reward_buffer)
 
     df_result.to_csv(os.path.join(dir_experiment, 'logging.csv'), sep=',', index=False)
 
@@ -227,7 +230,8 @@ def start_dqn_dueling_dqn(network_architecture: type, dir_experiment: str):
 def main_dqn_dueling_dqn():
     global ACTIONS_QUANTIZATION_LENGTH
 
-    actions_length = [5, 7, 9, 11, 13, 15]
+    # actions_length = [5, 7, 9, 11, 13, 15]
+    actions_length = [11, 11, 15]
 
     def create_folder(_folder: str):
         if not os.path.exists(_folder):
@@ -239,7 +243,7 @@ def main_dqn_dueling_dqn():
     folder = os.path.join(folder, 'architecture')
     create_folder(_folder=folder)
 
-    folder = os.path.join(folder, 'layers_3')
+    folder = os.path.join(folder, 'layers_333')
     create_folder(_folder=folder)
 
     for action_length in actions_length:
@@ -389,9 +393,14 @@ def testing_sac():
     env: LunarLanderContinuous = gym.make('LunarLanderContinuous-v2').unwrapped
 
     agent = SacAgent(env=env, hidden_size=256, delay_step=2)
-    agent.load_model('models//SAC//', episode=240, avg_100=208)
+    agent.load_model('models//SAC//', episode=820, avg_100=241)
 
-    reward_buffer = deque(maxlen=1000)
+    cols = ['Episode', 'Reward', 'Steps', 'AvgReward']
+    df = pd.DataFrame(columns=cols)
+
+    max_episodes = 1000
+    reward_buffer = deque(maxlen=max_episodes)
+
     episode_reward = 0
     episode_steps = 0
     state = env.reset()
@@ -401,20 +410,32 @@ def testing_sac():
 
         state, reward, done, _ = env.step(action=action)
         episode_reward += reward
-        env.render()
+        # env.render()
         if done or episode_steps >= 500:
             reward_buffer.append(episode_reward)
 
             avg_reward = np.mean(reward_buffer)
-            print('Avg reward', np.round(avg_reward, 1),
+            print('Episode', len(reward_buffer),
+                  'Avg reward', np.round(avg_reward, 1),
                   'Episode steps', episode_steps,
-                  'Episode reward', round(episode_reward, 1), len(reward_buffer))
+                  'Episode reward', round(episode_reward, 1))
+
+            df = df.append(
+                {
+                    'Episode': len(reward_buffer),
+                    'Reward': episode_reward,
+                    'Steps': episode_steps,
+                    'AvgReward': avg_reward,
+                },
+                ignore_index=True)
 
             episode_reward = 0
             episode_steps = 0
             env.reset()
 
-        if len(reward_buffer) == 1000:
+        if len(reward_buffer) == max_episodes:
+            df.to_csv(f'testing_sac.csv')
+            print('Done!', np.round(np.mean(reward_buffer), 1))
             break
 
 

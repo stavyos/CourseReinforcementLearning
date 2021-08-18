@@ -14,6 +14,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class SacAgent:
+
     def __init__(self, env: LunarLanderContinuous, hidden_size: int, delay_step: int):
         self.state_input_size = env.observation_space.shape[0]
         self.action_input_size = env.action_space.shape[0]
